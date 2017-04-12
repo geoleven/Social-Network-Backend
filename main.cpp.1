@@ -1,0 +1,88 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "./Graph/graph.h"
+#include "defines.h"
+
+#define CHECK(text, actual, expected)                         \
+  if (actual != expected) {                                   \
+    printf("%-30s: Failed | actual = %3d, expected = %3d\n",  \
+           text,                                              \
+           actual,                                            \
+           expected);                                         \
+  } else {                                                    \
+    printf("%-30s: Success\n", text);                     \
+  }
+
+int main(void) {
+
+	int m = 4;
+	int c = 4;
+
+	/* create empty graph */
+	Graph g(m, c);
+
+	g.LoadData();
+
+	/* print graph */
+	g.graph->print();
+
+	/* perform lookups in the graph */
+	Person* nl1 = g.graph->lookupNode(12);
+	nl1->print();
+	Person* nl2 = g.graph->lookupNode(16);
+	nl2->print();
+
+	/* find shortest path 1-1 */
+	int spt1 = g.reachNode1(1, 12);
+	CHECK("Shortest path between nodes (1,12)", spt1, 5);
+
+	int spt2 = g.reachNode1(14, 14);
+	CHECK("Shortest path between nodes (14,14)", spt2, 0);
+
+	int spt3 = g.reachNode1(3, 16);
+	CHECK("Shortest path between nodes (3,16)", spt3, 3);
+
+	int spt4 = g.reachNode1(5, 3);
+	CHECK("Shortest path between nodes (5,3)", spt4, INFINITY_REACH_NODE);
+	//reachNode1 must return INFINITY_REACH_NODE defined in defines.h when two nodes are not connected
+
+	/* find shortest paths 1-N */
+	ResultSet* res = g.reachNodeN(1);
+
+	Pair results[10] = { Pair(2, 1), Pair(6, 1), Pair(4, 1), Pair(3, 2), Pair(7,
+			2), Pair(8, 2), Pair(10, 3), Pair(14, 4), Pair(16, 5), Pair(12, 5) };
+
+	//Pair *pair = NULL;
+	int k;
+	int counter = 0;
+	while (!(g.next(res))) {
+		++counter;
+		for (k = 0; k < 10; ++k) {
+			if (results[k].id == res->pair->id) {
+				if (results[k].distance == res->pair->distance) {
+					printf("Shortest path between nodes (%d,%d): Success\n", 1,
+							results[k].id);
+				} else {
+					printf(
+							"Shortest path between nodes (%d,%d): Failed | actual = %3d, expected = %3d\n",
+							1, results[k].id, res->pair->distance,
+							results[k].distance);
+				}
+				break;
+			}
+		}
+		if (k == 10) {
+			printf("ReachNodeN : Failed | Your returned an extra Pair(%d,%d) ",
+					res->pair->id, res->pair->distance);
+		}
+		//delete pair;
+	}
+	CHECK("Number of pairs in the ResultSet", counter, 10);
+
+	delete res;
+	cout << "Exiting..." << endl;
+	return EXIT_SUCCESS;
+}
+

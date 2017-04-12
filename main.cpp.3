@@ -1,0 +1,48 @@
+#include <cstdlib>
+#include <iostream>
+#include <string>
+#include "Entities/entities.h"
+#include "Graph/graph.h"
+#include "Hash_Table/hashTable.h"
+#include "List_Template/list.h"
+
+using namespace std;
+
+int main(void) {
+
+	int m = 4;
+	int c = 4;
+
+	Graph g(m, c);
+
+	g.LoadData();
+
+	List<Forum>* fl = g.topNForums(6);
+	List<ForumPersons>* result = g.createNForumsGraphs(fl);
+
+//	//First algorithm
+	for (int i = 0; i < result->getSize(); i++) {
+		ForumPersons *fp = result->get(i);
+		cout << g.forums->lookupNode(fp->id)->title << endl;
+		Communities *result = cliquePercolationMethod(3, fp);
+		result->print_coms();
+		cout << endl;
+	}
+
+//
+//	//Second algorithm
+//	for (int i = 0; i < result->getSize(); i++) {
+//		ForumPersons *fp = result->get(i);
+//		cout << g.forums->lookupNode(fp->id)->title << endl;
+//		Communities *result = GirvanNewman(3, fp);
+//		result->print_coms();
+//	}
+
+	for (int c1 = 0; c1 < 6; (c1)++) {
+		delete result->get(c1);
+	}
+	delete fl;
+	delete result;
+
+	return EXIT_SUCCESS;
+}
